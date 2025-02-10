@@ -342,7 +342,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Back
+  m_Text: Leave
 --- !u!222 &17808735
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -435,7 +435,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -447,7 +447,7 @@ MonoBehaviour:
           m_StringArgument: Room Screen Host
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1320360983}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: NetworkManager, Assembly-CSharp
         m_MethodName: CreateRoom
         m_Mode: 1
@@ -1244,7 +1244,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -1511,7 +1511,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -1651,7 +1651,7 @@ GameObject:
   - component: {fileID: 331615607}
   m_Layer: 5
   m_Name: Room Screen Join
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1761,7 +1761,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -1895,7 +1895,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: ExitGame
         m_Mode: 1
@@ -2067,7 +2067,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -2322,7 +2322,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &555997443
 GameObject:
@@ -2336,26 +2336,14 @@ GameObject:
   - component: {fileID: 555997447}
   - component: {fileID: 555997446}
   - component: {fileID: 555997445}
-  - component: {fileID: 555997444}
+  - component: {fileID: 555997449}
   m_Layer: 5
-  m_Name: MainCanvas
+  m_Name: MainUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &555997444
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 555997443}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1295de49ef8d6814981724293806cf3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &555997445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2439,13 +2427,49 @@ RectTransform:
   - {fileID: 1329340790}
   - {fileID: 331615607}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &555997449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555997443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22d5119844ef909459b34d3de1495eaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sessionCodeInput: {fileID: 1195752844}
+  sessionCodeText: {fileID: 3602182}
+  playerCountText: {fileID: 1510276916}
+  playerListText: {fileID: 1457437680}
+  playerNameInput: {fileID: 2119208805}
+  _enterBtn: {fileID: 195182514}
+  _startBtn: {fileID: 1100574171}
+  _optionBtn: {fileID: 570623327}
+  _hostBtn: {fileID: 219453340}
+  _joinBtn: {fileID: 826717538}
+  _createRoomBtn: {fileID: 31343297}
+  _joinRoomBtn: {fileID: 501686098}
+  _backToLobbyBtn:
+  - {fileID: 1425829683}
+  - {fileID: 406134644}
+  _backToPlayModeBtn:
+  - {fileID: 1141873044}
+  - {fileID: 1145590363}
+  _leaveRoomBtn:
+  - {fileID: 1291262211}
+  - {fileID: 559108434}
+  _exitBtns:
+  - {fileID: 474071943}
+  - {fileID: 1628399558}
 --- !u!1 &559108432
 GameObject:
   m_ObjectHideFlags: 0
@@ -2459,7 +2483,7 @@ GameObject:
   - component: {fileID: 559108435}
   - component: {fileID: 559108434}
   m_Layer: 5
-  m_Name: BackBtn
+  m_Name: LeaveBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2530,7 +2554,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -2591,7 +2615,7 @@ GameObject:
   - component: {fileID: 563927345}
   m_Layer: 5
   m_Name: Lobby Screen
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2777,7 +2801,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -2971,7 +2995,7 @@ GameObject:
   - component: {fileID: 649553264}
   m_Layer: 5
   m_Name: Start Screen
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3309,7 +3333,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -3983,7 +4007,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Back
+  m_Text: Leave
 --- !u!222 &941467583
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4609,6 +4633,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1052136128}
   m_CullTransparentMesh: 1
+--- !u!1 &1057637716
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1057637717}
+  - component: {fileID: 1057637718}
+  m_Layer: 0
+  m_Name: IngameManaer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1057637717
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1057637716}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1376673629}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1057637718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1057637716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5331757c2541b4646b8f0d085c70bc9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  networkRunnerPrefab: {fileID: 4907158616686517674, guid: b1960f5135d3980408c71100ee6c87fe, type: 3}
+  roomManagerPrefab: {fileID: 8869597447549189694, guid: 310ca90f2b98a324492e8585ab12bd4a, type: 3}
 --- !u!1 &1066188641
 GameObject:
   m_ObjectHideFlags: 0
@@ -5002,7 +5072,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -5175,7 +5245,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -5309,7 +5379,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -6241,7 +6311,7 @@ GameObject:
   - component: {fileID: 1291262212}
   - component: {fileID: 1291262211}
   m_Layer: 5
-  m_Name: BackBtn
+  m_Name: LeaveBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6312,7 +6382,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -6373,7 +6443,7 @@ GameObject:
   - component: {fileID: 1293064569}
   m_Layer: 5
   m_Name: PlayMode Screen
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6399,134 +6469,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &1320360981
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1320360982}
-  - component: {fileID: 1320360983}
-  - component: {fileID: 1320360984}
-  - component: {fileID: 1320360985}
-  m_Layer: 0
-  m_Name: NetworkManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1320360982
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1320360981}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1320360983
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1320360981}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 825729efab46fa243933bdaf1d1bd018, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  roomCodeInput: {fileID: 1195752844}
---- !u!114 &1320360984
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1320360981}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1199893898, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1320360985
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1320360981}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -232609262, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnInput:
-    m_PersistentCalls:
-      m_Calls: []
-  OnInputMissing:
-    m_PersistentCalls:
-      m_Calls: []
-  OnConnectedToServer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnDisconnectedFromServer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnConnectRequest:
-    m_PersistentCalls:
-      m_Calls: []
-  OnConnectFailed:
-    m_PersistentCalls:
-      m_Calls: []
-  PlayerJoined:
-    m_PersistentCalls:
-      m_Calls: []
-  PlayerLeft:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSimulationMessage:
-    m_PersistentCalls:
-      m_Calls: []
-  OnShutdown:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSessionListUpdate:
-    m_PersistentCalls:
-      m_Calls: []
-  OnCustomAuthenticationResponse:
-    m_PersistentCalls:
-      m_Calls: []
-  OnHostMigration:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSceneLoadDone:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSceneLoadStart:
-    m_PersistentCalls:
-      m_Calls: []
-  OnReliableData:
-    m_PersistentCalls:
-      m_Calls: []
-  OnReliableProgress:
-    m_PersistentCalls:
-      m_Calls: []
-  OnObjectEnterAOI:
-    m_PersistentCalls:
-      m_Calls: []
-  OnObjectExitAOI:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1329340789
 GameObject:
   m_ObjectHideFlags: 0
@@ -6538,7 +6480,7 @@ GameObject:
   - component: {fileID: 1329340790}
   m_Layer: 5
   m_Name: Room Screen Host
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6817,6 +6759,38 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1376673628
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1376673629}
+  m_Layer: 0
+  m_Name: Managers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1376673629
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1376673628}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1057637717}
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1398074545
 GameObject:
   m_ObjectHideFlags: 0
@@ -6976,7 +6950,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: OpenUI
         m_Mode: 5
@@ -8213,7 +8187,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 555997444}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MainUIManager, Assembly-CSharp
         m_MethodName: ExitGame
         m_Mode: 1
@@ -8570,7 +8544,7 @@ GameObject:
   - component: {fileID: 1670065703}
   m_Layer: 5
   m_Name: Option Screen
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9614,7 +9588,7 @@ GameObject:
   - component: {fileID: 1925627363}
   m_Layer: 5
   m_Name: Create Room Screen
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10170,7 +10144,7 @@ GameObject:
   - component: {fileID: 2103965274}
   m_Layer: 5
   m_Name: Join Room Screen
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
