@@ -6,122 +6,35 @@ using Fusion.Sockets;
 using UnityEngine.SceneManagement;
 using System;
 using System.Threading.Tasks;
-using System.Linq;
-using UnityEngine.UI;
 
-
-
-public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
+public class CreateRoom : MonoBehaviour, INetworkRunnerCallbacks
 {
-	static RoomManager _uniqeInstance;
 
-
-
-	[SerializeField] Text _playerCount;
-	[SerializeField] Text _sessionCode;
-	[SerializeField] GameObject[] _playerList;
-
-	UIManager _uiManager;
 	NetworkRunner _runner;
 
-	int _maxPlayers = 4;
-	int _currentPlayer;
-
-
-
-	public static RoomManager _instance
+	public async void OpenRoom(string sessionCode)
 	{
-		get { return _uniqeInstance; }
-	}
+		GameMode gameMode = GameMode.Shared;
+		_runner = gameObject.AddComponent<NetworkRunner>();
+		_runner.ProvideInput = true; // player move
 
-	void Awake()
-	{
-		_uniqeInstance = this;
+		var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
+		var sceneInfo = new NetworkSceneInfo();
 
-	}
-
-	void Start()
-	{
-		_uiManager = FindObjectOfType<UIManager>();
-		_currentPlayer = 0;
-	}
-
-	//public async void OpenRoom(string sessionCode)
-	//{
-	//	GameMode gameMode = GameMode.Shared;
-	//	_runner = gameObject.AddComponent<NetworkRunner>();
-	//	_runner.ProvideInput = true; // player move
-
-	//	var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
-	//	var sceneInfo = new NetworkSceneInfo();
-
-	//	if (scene.IsValid)
-	//	{
-	//		sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
-	//	}
-
-	//	await _runner.StartGame(new StartGameArgs()
-	//	{
-	//		GameMode = gameMode,
-	//		SessionName = sessionCode,
-	//		Scene = scene,
-	//		SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
-	//	});
-
-	//	_sessionCode.text = sessionCode;
-	//}
-	public async Task<bool> OpenRoom(string sessionCode)
-	{
-		if (_runner == null)
+		if (scene.IsValid)
 		{
-			_runner = gameObject.AddComponent<NetworkRunner>();
-			_runner.ProvideInput = true; // 플레이어 이동 허용
+			sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
 		}
 
-		var result = await _runner.StartGame(new StartGameArgs()
+		await _runner.StartGame(new StartGameArgs()
 		{
-			GameMode = GameMode.Host, // 호스트 모드
+			GameMode = gameMode,
 			SessionName = sessionCode,
+			Scene = scene,
 			SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
 		});
-
-		if (!result.Ok)
-		{
-			Debug.Log("방 생성 실패!");
-			return false;
-		}
-
-		_sessionCode.text = sessionCode;
-		Debug.Log("방 생성 성공!");
-		return true;
 	}
 
-	public async Task<bool> JoinRoom(string sessionCode)
-	{
-		if (_runner == null)
-		{
-			_runner = gameObject.AddComponent<NetworkRunner>();
-			_runner.ProvideInput = true; // player move
-		}
-
-		var result = await _runner.StartGame(new StartGameArgs()
-		{
-			GameMode = GameMode.Shared,
-			SessionName = sessionCode,
-			SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
-		});
-
-		if (!result.Ok)
-		{
-			Debug.Log("방이 존재하지 않습니다. 아무런 동작 없이 리턴됩니다.");
-			return false; // 방이 존재하지 않으면 바로 리턴
-		}
-
-		_sessionCode.text = sessionCode;
-		Debug.Log("방에 성공적으로 참여했습니다.");
-		return true;
-		// 방에 참여한 후 추가적인 로직을 여기에 작성할 수 있습니다.
-	}
 
 	//public async Task JoinRoom(string sessionCode)
 	//{
@@ -158,25 +71,34 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 	//}
 
 
-
-	public void UpdatePlayerCount()
+	public async void JoinRoom(string sessionCode)
 	{
-		_currentPlayer = _runner.ActivePlayers.Count();
+		if (_runner == null)
+		{
+			_runner = gameObject.AddComponent<NetworkRunner>();
+			_runner.ProvideInput = true; // player move
+		}
 
-		_playerCount.text = $"({_currentPlayer}/{_maxPlayers})";
+		var result = await _runner.StartGame(new StartGameArgs()
+		{
+			GameMode = GameMode.Shared,
+			SessionName = sessionCode,
+			SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+		});
+
+		if (!result.Ok)
+		{
+			Debug.Log("방이 존재하지 않습니다. 아무런 동작 없이 리턴됩니다.");
+			return; // 방이 존재하지 않으면 바로 리턴
+		}
+
+		Debug.Log("방에 성공적으로 참여했습니다.");
+		// 방에 참여한 후 추가적인 로직을 여기에 작성할 수 있습니다.
 	}
 
-
-	public void AddPlayerList(PlayerRef player)
-	{
-		_playerList[_currentPlayer-1].gameObject.SetActive(true);
-		Text name = _playerList[_currentPlayer-1].transform.GetChild(0).GetComponent<Text>();
-	}
 
 	public void OnConnectedToServer(NetworkRunner runner)
 	{
-		UpdatePlayerCount();
-		AddPlayerList(_runner.LocalPlayer);
 	}
 
 	public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
@@ -217,13 +139,10 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 
 	public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
 	{
-		UpdatePlayerCount();
-		AddPlayerList(_runner.LocalPlayer);
 	}
 
 	public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
 	{
-		UpdatePlayerCount();
 	}
 
 	public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress)

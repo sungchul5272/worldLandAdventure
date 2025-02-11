@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Fusion;
+using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
-	public InputField sessionCodeInput;  // 세션 코드 입력 필드
-	public Text sessionCodeText;         // 세션 코드 표시 UI
-	public Text playerCountText;         // 현재 인원 표시 UI
-	public Text playerListText;          // 플레이어 목록 UI
-	public InputField playerNameInput;   // 플레이어 이름 입력 필드
+	[Header("사용자 입력 정보")]
+	[SerializeField] InputField _inputName;
+	[SerializeField] InputField _sessionCodeHost;
+	[SerializeField] InputField _sessionCodeJoin;
 
 	[Header("버튼 모음")]
 	[SerializeField] Button _enterBtn;
@@ -18,97 +18,229 @@ public class UIManager : MonoBehaviour
 	[SerializeField] Button _joinBtn;
 	[SerializeField] Button _createRoomBtn;
 	[SerializeField] Button _joinRoomBtn;
+	[SerializeField] Button _startGameBtn;
+	[SerializeField] Button _ReadyBtn;
+	[SerializeField] Button _leaveRoomBtn;
 
 	[SerializeField] Button[] _backToLobbyBtn;
-	[SerializeField] Button[] _backToPlayModeBtn;
-	[SerializeField] Button[] _leaveRoomBtn;
+	[SerializeField] Button[] _backToSelectModeBtn;
 	[SerializeField] Button[] _exitBtns;
 
-	private RoomManager _roomManager;
+	[SerializeField]  GameObject _connectWaitScreen; // 연결 대기 UI 패널
+	[SerializeField]  Text _connectWaitText;
+	public string _playerName { get; set; }
+	string _sessionCode;
+	bool _isHost;
+	bool _isConnecting;
+
 
 	void Start()
 	{
-		_roomManager = FindObjectOfType<RoomManager>();
+		ChangeUI("Start Screen");
+		ResetButton();
+		_isHost = false;
+		_isConnecting = false;
 
-		if (_roomManager == null)
-		{
-			Debug.LogError("RoomManager가 씬에서 발견되지 않았습니다. RoomManager를 생성합니다.");
-			GameObject roomManagerObj = new GameObject("RoomManager");
-			_roomManager = roomManagerObj.AddComponent<RoomManager>();
-		}
 
-		_roomManager.OnRoomUpdated += UpdateUI;
+	}
 
+
+	void ResetButton()
+	{
 		_enterBtn.onClick.AddListener(StartToLobby);
-		_startBtn.onClick.AddListener(LobbyToPlayMode);
 		_optionBtn.onClick.AddListener(LobbyToOption);
-		_hostBtn.onClick.AddListener(PlayModeToCreateRoom);
-		_joinBtn.onClick.AddListener(PlayModeToJoinRoom);
+		_startBtn.onClick.AddListener(LobbyToSelectMode);
+		_hostBtn.onClick.AddListener(SelectModeToCreateRoom);
+		_joinBtn.onClick.AddListener(SelectModeToJoinRoom);
 		_createRoomBtn.onClick.AddListener(CreateRoom);
 		_joinRoomBtn.onClick.AddListener(JoinRoom);
+		_startGameBtn.onClick.AddListener(StartGame);
+		_ReadyBtn.onClick.AddListener(ReadyGame);
+		_leaveRoomBtn.onClick.AddListener(LeaveRoom);
 
 		foreach (Button backToLobbyBtn in _backToLobbyBtn)
+		{
 			backToLobbyBtn.onClick.AddListener(BackToLobby);
+		}
 
-		foreach (Button backToPlayModeBtn in _backToPlayModeBtn)
-			backToPlayModeBtn.onClick.AddListener(BackToPlayMode);
-
-		foreach (Button leaveRoomBtn in _leaveRoomBtn)
-			leaveRoomBtn.onClick.AddListener(LeaveRoom);
+		foreach (Button backToSelectModeBtn in _backToSelectModeBtn)
+		{
+			backToSelectModeBtn.onClick.AddListener(BackToSelectMode);
+		}
 
 		foreach (Button exitBtn in _exitBtns)
+		{
 			exitBtn.onClick.AddListener(ExitGame);
+		}
 
-		ShowUI("Start Screen");
 	}
-
 	void StartToLobby()
 	{
-		string playerName = playerNameInput.text;
-		if (string.IsNullOrEmpty(playerName))
+		if (string.IsNullOrEmpty(_inputName.text))
 		{
-			Debug.LogWarning("플레이어 이름을 입력하세요.");
+			Debug.Log("이름을 입력하세요!!");
 			return;
 		}
-
-		PlayerPrefs.SetString("PlayerName", playerName);
-		PlayerPrefs.Save();
-		ShowUI("Lobby Screen");
-	}
-
-	void LobbyToPlayMode() => ShowUI("PlayMode Screen");
-	void LobbyToOption() => ShowUI("Option Screen");
-	void PlayModeToCreateRoom() => ShowUI("Create Room Screen");
-	void PlayModeToJoinRoom() => ShowUI("Join Room Screen");
-
-	void CreateRoom()
-	{
-		string sessionCode = sessionCodeInput.text;
-		if (string.IsNullOrEmpty(sessionCode))
+		else
 		{
-			Debug.LogWarning("세션 코드를 입력하세요.");
+			_playerName = _inputName.text;
+			Debug.LogFormat("로비 입장완료 당신의 이름은 {0}입니다.", _playerName);
+			ChangeUI("Lobby Screen");
+		}
+	}
+	void LobbyToOption()
+	{
+		ChangeUI("Option Screen");
+
+	}
+	void LobbyToSelectMode()
+	{
+		ChangeUI("Select Mode Screen");
+	}
+	void SelectModeToCreateRoom()
+	{
+		ChangeUI("Create Room Screen");
+	}
+	void SelectModeToJoinRoom()
+	{
+		ChangeUI("Join Room Screen");
+	}
+	//void CreateRoom()
+	//{
+	//	if (string.IsNullOrEmpty(_sessionCodeHost.text))
+	//	{
+	//		Debug.Log("세션코드를 입력하세요!!");
+	//		return;
+	//	}
+	//	else
+	//	{
+	//		_sessionCode = _sessionCodeHost.text;
+	//		RoomManager._instance.OpenRoom(_sessionCode);
+	//		ChangeUI("Waiting Room Screen");
+	//		_startGameBtn.gameObject.SetActive(true);
+	//		_isHost = true;
+	//	}
+	//}
+	public async void CreateRoom()
+	{
+		if (string.IsNullOrEmpty(_sessionCodeHost.text))
+		{
+			Debug.Log("세션코드를 입력하세요!!");
 			return;
 		}
+		ShowConnectingUI();
 
-		_roomManager.CreateRoom(sessionCode);
-		ShowUI("Room Screen Host");
+		_sessionCode = _sessionCodeHost.text;
+
+
+		bool success = await RoomManager._instance.OpenRoom(_sessionCode);
+		HideConnectingUI();
+
+		if (success)
+		{
+			ChangeUI("Waiting Room Screen");
+			_startGameBtn.gameObject.SetActive(true);
+			_isHost = true;
+		}
+		else
+		{
+			Debug.Log("방 생성 실패!");
+		}
 	}
-
-	void JoinRoom()
+	public async void JoinRoom()
 	{
-		_roomManager.JoinRoom();
-		ShowUI("Room Screen Join");
+		if (string.IsNullOrEmpty(_sessionCodeJoin.text))
+		{
+			Debug.Log("세션코드를 입력하세요!!");
+			return;
+		}
+		ShowConnectingUI();
+
+		_sessionCode = _sessionCodeJoin.text;
+		
+		bool success = await RoomManager._instance.JoinRoom(_sessionCode); // 비동기 실행
+		HideConnectingUI();
+
+		if (success)
+		{
+			ChangeUI("Waiting Room Screen"); // 방 참가 성공 시 UI 변경
+			_ReadyBtn.gameObject.SetActive(true);
+		}
+		else
+		{
+			Debug.Log("방 참가 실패");
+		}
 	}
+
+
+	public void ShowConnectingUI()
+	{
+		_connectWaitScreen.SetActive(true);
+		_isConnecting = true;
+		StartCoroutine(AnimateConnectingText());
+	}
+	public void HideConnectingUI()
+	{
+		_isConnecting = false;
+		_connectWaitScreen.SetActive(false);
+		StopCoroutine(AnimateConnectingText());
+	}
+
+	IEnumerator AnimateConnectingText()
+	{
+		string baseText = "Connecting";
+		int dotCount = 0;
+
+		while (_isConnecting)
+		{
+			_connectWaitText.text = baseText + new string('.', dotCount);
+			dotCount = (dotCount + 1) % 5; // 0 ~ 4 반복 (최대 4개 점)
+			yield return new WaitForSeconds(0.5f);
+		}
+	}
+
+
+
+
+
+
+	void StartGame()
+	{
+		Debug.Log("게임 스타트");
+	}
+	void ReadyGame()
+	{
+		Debug.Log("레디");
+	}
+
 
 	void LeaveRoom()
 	{
-		_roomManager.LeaveRoom();
-		ShowUI("Lobby Screen");
+		if(_isHost)
+		{
+			//호스트일경우 멀티 방을 파괴
+			ChangeUI("Lobby Screen");
+			_isHost = false;
+			_startGameBtn.gameObject.SetActive(false);
+			_ReadyBtn.gameObject.SetActive(false);
+		}
+		else
+		{
+			//그냥 유저가 방을나감
+			ChangeUI("Lobby Screen");
+			_isHost = false;
+			_startGameBtn.gameObject.SetActive(false);
+			_ReadyBtn.gameObject.SetActive(false);
+		}	
 	}
-
-	void BackToLobby() => ShowUI("Lobby Screen");
-	void BackToPlayMode() => ShowUI("PlayMode Screen");
-
+	void BackToLobby()
+	{
+		ChangeUI("Lobby Screen");
+	}
+	void BackToSelectMode()
+	{
+		ChangeUI("Select Mode Screen");
+	}
 	void ExitGame()
 	{
 #if UNITY_EDITOR
@@ -117,15 +249,7 @@ public class UIManager : MonoBehaviour
         Application.Quit();
 #endif
 	}
-
-	void UpdateUI()
-	{
-		sessionCodeText.text = $"방 코드: {_roomManager.SessionCode}";
-		playerCountText.text = $"플레이어: {_roomManager.PlayerCount}/4";
-		playerListText.text = _roomManager.GetPlayerList();
-	}
-
-	void ShowUI(string uiName)
+	void ChangeUI(string uiName)
 	{
 		GameObject[] allUIs = GameObject.FindGameObjectsWithTag("UI");
 		foreach (var ui in allUIs) ui.SetActive(false);

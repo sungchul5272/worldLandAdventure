@@ -45,7 +45,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8095b37044da57458aadecf49d44c64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _PlayerCount: 0
+  _playerCount: {fileID: 0}
+  _sessionCode: {fileID: 0}
+  _playerList: []
 --- !u!114 &8869597447549189688
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,6 +64,5 @@ MonoBehaviour:
   ObjectInterest: 1
   Flags: 262145
   NestedObjects: []
-  NetworkedBehaviours:
-  - {fileID: 8869597447549189694}
+  NetworkedBehaviours: []
   ForceRemoteRenderTimeframe: 0
