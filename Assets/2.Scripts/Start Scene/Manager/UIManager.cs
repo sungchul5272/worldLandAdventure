@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using Fusion;
 using System.Collections;
+using System.Threading.Tasks;
+using System.Threading;
 
 public class UIManager : MonoBehaviour
 {
@@ -21,13 +23,14 @@ public class UIManager : MonoBehaviour
 	[SerializeField] Button _startGameBtn;
 	[SerializeField] Button _ReadyBtn;
 	[SerializeField] Button _leaveRoomBtn;
+	[SerializeField] Button _cansleBtn;
 
 	[SerializeField] Button[] _backToLobbyBtn;
 	[SerializeField] Button[] _backToSelectModeBtn;
 	[SerializeField] Button[] _exitBtns;
 
-	[SerializeField]  GameObject _connectWaitScreen; // 연결 대기 UI 패널
-	[SerializeField]  Text _connectWaitText;
+	[SerializeField] GameObject _connectWaitScreen; // 연결 대기 UI 패널
+	[SerializeField] Text _connectWaitText;
 	public string _playerName { get; set; }
 	string _sessionCode;
 	bool _isHost;
@@ -40,8 +43,6 @@ public class UIManager : MonoBehaviour
 		ResetButton();
 		_isHost = false;
 		_isConnecting = false;
-
-
 	}
 
 
@@ -57,6 +58,7 @@ public class UIManager : MonoBehaviour
 		_startGameBtn.onClick.AddListener(StartGame);
 		_ReadyBtn.onClick.AddListener(ReadyGame);
 		_leaveRoomBtn.onClick.AddListener(LeaveRoom);
+		_cansleBtn.onClick.AddListener(CansleConecting);
 
 		foreach (Button backToLobbyBtn in _backToLobbyBtn)
 		{
@@ -79,6 +81,9 @@ public class UIManager : MonoBehaviour
 		if (string.IsNullOrEmpty(_inputName.text))
 		{
 			Debug.Log("이름을 입력하세요!!");
+
+			PlayerPrefs.SetString("PlayerName", _playerName);
+			PlayerPrefs.Save();
 			return;
 		}
 		else
@@ -105,22 +110,6 @@ public class UIManager : MonoBehaviour
 	{
 		ChangeUI("Join Room Screen");
 	}
-	//void CreateRoom()
-	//{
-	//	if (string.IsNullOrEmpty(_sessionCodeHost.text))
-	//	{
-	//		Debug.Log("세션코드를 입력하세요!!");
-	//		return;
-	//	}
-	//	else
-	//	{
-	//		_sessionCode = _sessionCodeHost.text;
-	//		RoomManager._instance.OpenRoom(_sessionCode);
-	//		ChangeUI("Waiting Room Screen");
-	//		_startGameBtn.gameObject.SetActive(true);
-	//		_isHost = true;
-	//	}
-	//}
 	public async void CreateRoom()
 	{
 		if (string.IsNullOrEmpty(_sessionCodeHost.text))
@@ -157,7 +146,7 @@ public class UIManager : MonoBehaviour
 		ShowConnectingUI();
 
 		_sessionCode = _sessionCodeJoin.text;
-		
+
 		bool success = await RoomManager._instance.JoinRoom(_sessionCode); // 비동기 실행
 		HideConnectingUI();
 
@@ -171,8 +160,6 @@ public class UIManager : MonoBehaviour
 			Debug.Log("방 참가 실패");
 		}
 	}
-
-
 	public void ShowConnectingUI()
 	{
 		_connectWaitScreen.SetActive(true);
@@ -185,7 +172,6 @@ public class UIManager : MonoBehaviour
 		_connectWaitScreen.SetActive(false);
 		StopCoroutine(AnimateConnectingText());
 	}
-
 	IEnumerator AnimateConnectingText()
 	{
 		string baseText = "Connecting";
@@ -193,12 +179,11 @@ public class UIManager : MonoBehaviour
 
 		while (_isConnecting)
 		{
-			_connectWaitText.text = baseText + new string('.', dotCount);
+			_connectWaitText.text = baseText + " " + string.Join(" ", new string('.', dotCount).ToCharArray());
 			dotCount = (dotCount + 1) % 5; // 0 ~ 4 반복 (최대 4개 점)
 			yield return new WaitForSeconds(0.5f);
 		}
 	}
-
 
 
 
@@ -212,26 +197,21 @@ public class UIManager : MonoBehaviour
 	{
 		Debug.Log("레디");
 	}
-
-
 	void LeaveRoom()
 	{
-		if(_isHost)
-		{
-			//호스트일경우 멀티 방을 파괴
-			ChangeUI("Lobby Screen");
-			_isHost = false;
-			_startGameBtn.gameObject.SetActive(false);
-			_ReadyBtn.gameObject.SetActive(false);
-		}
-		else
-		{
-			//그냥 유저가 방을나감
-			ChangeUI("Lobby Screen");
-			_isHost = false;
-			_startGameBtn.gameObject.SetActive(false);
-			_ReadyBtn.gameObject.SetActive(false);
-		}	
+		RoomManager._instance.LeaveRoom();
+
+		_isHost = false;
+		_startGameBtn.gameObject.SetActive(false);
+		_ReadyBtn.gameObject.SetActive(false);
+
+		ChangeUI("Lobby Screen");
+	}
+
+
+	void CansleConecting()
+	{
+		HideConnectingUI();
 	}
 	void BackToLobby()
 	{
@@ -249,7 +229,7 @@ public class UIManager : MonoBehaviour
         Application.Quit();
 #endif
 	}
-	void ChangeUI(string uiName)
+	public void ChangeUI(string uiName)
 	{
 		GameObject[] allUIs = GameObject.FindGameObjectsWithTag("UI");
 		foreach (var ui in allUIs) ui.SetActive(false);
@@ -257,5 +237,7 @@ public class UIManager : MonoBehaviour
 		Transform child = transform.Find(uiName);
 		if (child != null) child.gameObject.SetActive(true);
 	}
+
+
 
 }
