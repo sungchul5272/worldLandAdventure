@@ -13,38 +13,43 @@ using UnityEngine.UI;
 
 public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 {
-	static RoomManager _uniqeInstance;
+	static RoomManager _uniqueInstance;
+
+	public static RoomManager _instance
+	{
+		get { return _uniqueInstance; }
+	}
 
 
+	[Networked] private NetworkDictionary<PlayerRef, string> _playerNames { get; set; }
 
 	[SerializeField] Text _playerCount;
 	[SerializeField] Text _sessionCode;
 	[SerializeField] GameObject[] _playerList;
 	[SerializeField] GameObject _runnerPrefab;
-	[SerializeField]  NetworkObject _playerPrefab;
 
 	UIManager _uiManager;
-
 	NetworkRunner _runner;
 	NetworkSceneManagerDefault _sceneManager;
-	PlayerRef _hostPlayer;
 	int _maxPlayers = 4;
 	int _currentPlayer;
+	bool _runnerInitialized = false;
 
 
 
-
-	public static RoomManager _instance
-	{
-		get { return _uniqeInstance; }
-	}
 
 	void Awake()
 	{
-		_uniqeInstance = this;
+		if (_uniqueInstance != null && _uniqueInstance != this)
+		{
+			Destroy(gameObject);
+			return;
+		}
+		_uniqueInstance = this;
 		DontDestroyOnLoad(gameObject);
 
 	}
+
 
 
 	void Start()
@@ -52,6 +57,26 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 		_uiManager = FindObjectOfType<UIManager>();
 		_currentPlayer = 0;
 	}
+
+
+
+	private void Update()
+	{
+		if (!_runnerInitialized && _runner != null)
+		{
+			Debug.Log("NetworkRunner가 이제 초기화됨! OnPlayerJoined 호출 가능");
+			_runnerInitialized = true;
+		}
+	}
+	public void AddPlayer(PlayerRef player, string name)
+	{
+		if (!_playerNames.ContainsKey(player))
+		{
+			_playerNames.Add(player, name);
+		}
+		RefreshPlayerListUI();
+	}
+
 	public async Task<bool> OpenRoom(string sessionCode)
 	{
 		if (_runner == null)
@@ -59,17 +84,14 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 			_runner = Instantiate(_runnerPrefab).GetComponent<NetworkRunner>();
 			_runner.ProvideInput = true;
 		}
-
 		_runner.AddCallbacks(this);
 
-		if (_sceneManager == null) // SceneManager 중복 추가 방지
-		{
+		if (_sceneManager == null)
 			_sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
-		}
 
 		var result = await _runner.StartGame(new StartGameArgs()
 		{
-			GameMode = GameMode.Host,  // 방장(호스트)
+			GameMode = GameMode.Host,
 			SessionName = sessionCode,
 			SceneManager = _sceneManager
 		});
@@ -131,42 +153,14 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 			Debug.Log("클라이언트가 방을 나감");
 		}
 	}
-	void RefreshPlayerListUI1()
-	{
-		// UI 초기화
-		foreach (var obj in _playerList)
-		{
-			obj.SetActive(false);
-		}
-
-		// 현재 접속한 플레이어 수 갱신
-		_currentPlayer = _runner.ActivePlayers.Count();
-		_playerCount.text = $"({_currentPlayer}/{_maxPlayers})";
-
-		// 현재 접속한 플레이어 수만큼 UI 활성화
-		int index = 0;
-		foreach (var player in _runner.ActivePlayers)
-		{
-			if (index < _playerList.Length)
-			{
-				_playerList[index].SetActive(true);
-				Text name = _playerList[index].transform.GetChild(0).GetComponent<Text>();
-				name.text = $"Player {player.PlayerId}";
-			}
-			index++;
-		}
-	}
-
 	void RefreshPlayerListUI()
 	{
+		// 모든 UI 오브젝트 비활성화
 		foreach (var obj in _playerList)
-		{
 			obj.SetActive(false);
-		}
 
 		_currentPlayer = _runner.ActivePlayers.Count();
 		_playerCount.text = $"({_currentPlayer}/{_maxPlayers})";
-		Debug.Log($"현재 참여자 수: {_currentPlayer}/{_maxPlayers}");
 
 		int index = 0;
 		foreach (var player in _runner.ActivePlayers)
@@ -174,34 +168,19 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 			if (index < _playerList.Length)
 			{
 				_playerList[index].SetActive(true);
-				Text name = _playerList[index].transform.GetChild(0).GetComponent<Text>();
-
-				// 네트워크 오브젝트에서 플레이어 이름 가져오기
-				NetworkObject playerObject = _runner.GetPlayerObject(player);
-				if (playerObject == null)
-				{
-					Debug.LogWarning($" 플레이어 {player.PlayerId}의 NetworkObject를 찾을 수 없습니다!");
-					name.text = $"Player {player.PlayerId} (Unknown)";
-					continue;
-				}
-
-				PlayerNetworkData playerData = playerObject.GetComponent<PlayerNetworkData>();
-				if (playerData == null)
-				{
-					Debug.LogWarning($" 플레이어 {player.PlayerId}의 PlayerNetworkData를 찾을 수 없습니다!");
-					name.text = $"Player {player.PlayerId} (No Data)";
-					continue;
-				}
-
-				name.text = playerData.PlayerName; // 네트워크 데이터에서 동기화된 이름 표시
+				Text nameText = _playerList[index].transform.GetChild(0).GetComponent<Text>();
+				// PlayerManager에서 플레이어 이름을 가져옴
+				//	string playerName = PlayerManager._instance.GetPlayerName(player) ?? $"Player {player.PlayerId}";
+				//nameText.text = playerName;
 			}
 			index++;
 		}
 	}
+
 
 
 	[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-	void UpdateAllClientsUI(RpcInfo info = default)
+	public void UpdateAllClientsUI(RpcInfo info = default)
 	{
 		RefreshPlayerListUI(); // 모든 클라이언트에서 UI 갱신
 	}
@@ -219,53 +198,17 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 	{
 	}
 
-
 	public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
 	{
 		Debug.Log($"플레이어 {player.PlayerId} 입장!");
-;
-
-		if (runner.IsServer) //  서버(호스트)에서만 플레이어를 생성
-		{
-			NetworkObject playerObject = runner.Spawn(_playerPrefab, Vector3.zero, Quaternion.identity, player);
-
-			if (playerObject == null)
-			{
-				Debug.LogError(" NetworkObject가 생성되지 않았습니다! _playerPrefab을 확인하세요.");
-				return;
-			}
-
-			PlayerNetworkData networkData = playerObject.GetComponent<PlayerNetworkData>();
-
-			if (networkData == null)
-			{
-				Debug.LogError(" PlayerNetworkData 컴포넌트가 없습니다! PlayerPrefab을 확인하세요.");
-				return;
-			}
-
-			if (player == runner.LocalPlayer) //  본인 플레이어일 경우
-			{
-				networkData.LoadPlayerData(); //  로컬에서 데이터 불러오기
-			}
-		}
-
 		UpdateAllClientsUI();
+
 	}
-
-
 
 
 	public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
 	{
 		Debug.Log($"플레이어 {player.PlayerId} 퇴장!");
-
-		NetworkObject playerObject = runner.GetPlayerObject(player);
-		if (playerObject != null)
-		{
-			runner.Despawn(playerObject); 
-			Destroy(playerObject.gameObject);
-		}
-
 		UpdateAllClientsUI();
 	}
 
@@ -284,7 +227,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 	}
 
 	public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
-	{ 
+	{
 	}
 
 	public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
@@ -331,14 +274,5 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 	public void OnSceneLoadStart(NetworkRunner runner)
 	{
 	}
-
-
-
-
-
-
-
-
-
 
 }

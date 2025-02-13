@@ -76,22 +76,25 @@ public class UIManager : MonoBehaviour
 		}
 
 	}
-	void StartToLobby()
+	public void StartToLobby()
 	{
 		if (string.IsNullOrEmpty(_inputName.text))
 		{
 			Debug.Log("이름을 입력하세요!!");
-
-			PlayerPrefs.SetString("PlayerName", _playerName);
-			PlayerPrefs.Save();
 			return;
 		}
-		else
+
+		string playerName = _inputName.text.Trim();
+
+
+		//  PlayerManager에 이름 저장
+		if (PlayerManager._instance != null)
 		{
-			_playerName = _inputName.text;
-			Debug.LogFormat("로비 입장완료 당신의 이름은 {0}입니다.", _playerName);
-			ChangeUI("Lobby Screen");
+			PlayerManager._instance.SetLocalPlayerName(playerName);
 		}
+
+		Debug.LogFormat("로비 입장 완료! 당신의 이름은 {0}입니다.", playerName);
+		ChangeUI("Lobby Screen");
 	}
 	void LobbyToOption()
 	{
@@ -110,6 +113,7 @@ public class UIManager : MonoBehaviour
 	{
 		ChangeUI("Join Room Screen");
 	}
+
 	public async void CreateRoom()
 	{
 		if (string.IsNullOrEmpty(_sessionCodeHost.text))
@@ -117,10 +121,9 @@ public class UIManager : MonoBehaviour
 			Debug.Log("세션코드를 입력하세요!!");
 			return;
 		}
+
 		ShowConnectingUI();
-
 		_sessionCode = _sessionCodeHost.text;
-
 
 		bool success = await RoomManager._instance.OpenRoom(_sessionCode);
 		HideConnectingUI();
@@ -130,12 +133,15 @@ public class UIManager : MonoBehaviour
 			ChangeUI("Waiting Room Screen");
 			_startGameBtn.gameObject.SetActive(true);
 			_isHost = true;
+
+			StartCoroutine(WaitForPlayerManagerAndSendName());
 		}
 		else
 		{
 			Debug.Log("방 생성 실패!");
 		}
 	}
+
 	public async void JoinRoom()
 	{
 		if (string.IsNullOrEmpty(_sessionCodeJoin.text))
@@ -143,23 +149,36 @@ public class UIManager : MonoBehaviour
 			Debug.Log("세션코드를 입력하세요!!");
 			return;
 		}
-		ShowConnectingUI();
 
+		ShowConnectingUI();
 		_sessionCode = _sessionCodeJoin.text;
 
-		bool success = await RoomManager._instance.JoinRoom(_sessionCode); // 비동기 실행
+		bool success = await RoomManager._instance.JoinRoom(_sessionCode);
 		HideConnectingUI();
 
 		if (success)
 		{
-			ChangeUI("Waiting Room Screen"); // 방 참가 성공 시 UI 변경
+			ChangeUI("Waiting Room Screen");
 			_ReadyBtn.gameObject.SetActive(true);
+
+			StartCoroutine(WaitForPlayerManagerAndSendName());
 		}
 		else
 		{
 			Debug.Log("방 참가 실패");
 		}
 	}
+
+	private IEnumerator WaitForPlayerManagerAndSendName()
+	{
+		while (PlayerManager._instance == null || !PlayerManager._instance.Object || !PlayerManager._instance.Object.IsValid)
+		{
+			yield return null; // 네트워크 오브젝트가 스폰될 때까지 대기
+		}
+
+		PlayerManager._instance.SendNameToServer();
+	}
+
 	public void ShowConnectingUI()
 	{
 		_connectWaitScreen.SetActive(true);
@@ -179,7 +198,7 @@ public class UIManager : MonoBehaviour
 
 		while (_isConnecting)
 		{
-			_connectWaitText.text = baseText + " " + string.Join(" ", new string('.', dotCount).ToCharArray());
+			_connectWaitText.text = baseText + " " + new string('.', dotCount);
 			dotCount = (dotCount + 1) % 5; // 0 ~ 4 반복 (최대 4개 점)
 			yield return new WaitForSeconds(0.5f);
 		}
