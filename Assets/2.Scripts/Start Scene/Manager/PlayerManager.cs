@@ -1,51 +1,96 @@
-﻿using Fusion;
+﻿using System.Collections.Generic;
+using Fusion;
 using UnityEngine;
 
 public class PlayerManager : NetworkBehaviour
 {
-    public static PlayerManager _instance;
+    public static PlayerManager LocalInstance { get; set; }
+    public string LocalPlayerName { get; set; } = "Guest";
 
-    //  네트워크 변수는 Spawned 이후에만 접근 가능하므로, 일반 변수로 임시 저장
-    private string _localPlayerName;
+    [Networked] public NetworkString<_16> playerName { get; set; }
+    [Networked] public bool isReady { get; set; }
 
-    [Networked] public string PlayerName { get; private set; } // Spawned 이후에만 접근 가능
+    static List<PlayerManager> _allPlayersList = new List<PlayerManager>();
 
-    private void Awake()
+    void Awake()
     {
-        _instance = this;
-    }
-
-    //  UIManager에서 이름을 저장할 때 Networked 변수를 사용하지 않고 일반 변수 사용
-    public void SetLocalPlayerName(string name)
-    {
-        _localPlayerName = name;
+        if (LocalInstance == null)
+        {
+            LocalInstance = this; //  미리 LocalInstance 설정
+            DontDestroyOnLoad(gameObject);
+        }
+        Debug.Log("[PlayerManager] Awake() 호출됨. 오브젝트가 생성됨.");
     }
 
     public override void Spawned()
     {
-        if (Object.HasInputAuthority) // 본인만 실행 가능
+        Debug.Log("[PlayerManager] Spawned() 호출됨.");
+
+        if (Object.HasInputAuthority)
         {
-            SendNameToServer();
+            LocalInstance = this;
+            Debug.Log("[PlayerManager] 로컬 인스턴스 설정 완료.");
+            Invoke(nameof(SetLocalPlayerName), 0.2f);
+        }
+
+        if (Object.HasStateAuthority)
+        {
+            RoomManager._instance.UpdateAllClientsUI();
         }
     }
 
-    public void SendNameToServer()
-    {
-        if (!Object || !Object.IsValid) return;
 
-        //  Networked 변수를 직접 설정하지 않고 RPC로 서버에 전달
-        if (!string.IsNullOrEmpty(_localPlayerName))
+    void SetLocalPlayerName()
+    {
+        string cachedName = PlayerData._instance.GetPlayerName();
+        RequestSetPlayerName(cachedName);
+    }
+
+
+    public void RequestSetPlayerName(string name)
+    {
+        if (!Object.HasInputAuthority)
         {
-            RPC_SetPlayerName(_localPlayerName);
+            return;
         }
+
+        Debug.Log("[PlayerManager] 플레이어 이름 설정 요청: " + name);
+        RPC_SetPlayerName(name);
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    public void RPC_SetPlayerName(string name, RpcInfo info = default)
+    void RPC_SetPlayerName(string name)
     {
-        if (Runner.IsServer || Runner.IsSharedModeMasterClient)
+        playerName = name;
+        RoomManager._instance.UpdateAllClientsUI();
+    }
+
+
+    public void ToggleReadyState()
+    {
+        if (!Object.HasInputAuthority)
         {
-            RoomManager._instance.AddPlayer(info.Source, name);
+            return;
         }
+
+        if (Object.HasStateAuthority)
+        {
+            return;
+        }
+
+        bool newReadyState = !isReady;
+        RPC_SetReadyState(newReadyState);
+
+        RoomManager._instance.UpdateAllClientsUI();
+    }
+
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    void RPC_SetReadyState(bool readyState)
+    {
+        isReady = Object.HasStateAuthority ? true : readyState;
+        RoomManager._instance.UpdateAllClientsUI();
     }
 }
+
+
