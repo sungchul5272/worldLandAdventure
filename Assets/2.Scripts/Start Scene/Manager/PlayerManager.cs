@@ -10,7 +10,7 @@ public class PlayerManager : NetworkBehaviour
     [Networked] public NetworkString<_16> playerName { get; set; }
     [Networked] public bool isReady { get; set; }
 
-    static List<PlayerManager> _allPlayersList = new List<PlayerManager>();
+    //static List<PlayerManager> _allPlayersList = new List<PlayerManager>();
 
     void Awake()
     {
@@ -80,15 +80,13 @@ public class PlayerManager : NetworkBehaviour
 
         bool newReadyState = !isReady;
         RPC_SetReadyState(newReadyState);
-
-        RoomManager._instance.UpdateAllClientsUI();
     }
 
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     void RPC_SetReadyState(bool readyState)
     {
-        isReady = Object.HasStateAuthority ? true : readyState;
+        isReady = readyState;
         RoomManager._instance.UpdateAllClientsUI();
     }
 }
