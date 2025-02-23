@@ -7,7 +7,7 @@ public class IngameManager : NetworkBehaviour
 {
     public static IngameManager _instance;
     int _currentPlayerIndex = 0;
-    [SerializeField] private PlayerController[] _players;
+
 
     void Awake()
     {
@@ -17,9 +17,4 @@ public class IngameManager : NetworkBehaviour
         }
     }
 
-    public void MoveCurrentPlayer(int steps)
-    {
-        _players[_currentPlayerIndex].Move(steps);
-        _currentPlayerIndex = (_currentPlayerIndex + 1) % _players.Length;
-    }
 }

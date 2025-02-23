@@ -29,6 +29,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] Sprite _readySprite;
     [SerializeField] Sprite _unreadySprite;
 
+
     NetworkRunner _runner;
     NetworkSceneManagerDefault _sceneManager;
 
@@ -44,6 +45,43 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
         }
         _uniqueInstance = this;
         DontDestroyOnLoad(gameObject);
+    }
+    void Start()
+    {
+        if (startGameButton != null)
+        {
+            startGameButton.onClick.AddListener(StartGame);
+        }
+    }
+    public void StartGame()
+    {
+        if (_runner != null && _runner.IsServer)
+        {
+            Debug.Log("[RoomManager] 게임 시작 - 씬 변경 중");
+            RPC_LoadGameScene();
+        }
+    }
+
+    //[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    //private void RPC_LoadGameScene()
+    //{
+    //    Debug.Log("[RoomManager] 모든 플레이어가 GameScene으로 이동");
+    //    if (_sceneManager != null && _runner != null)
+    //    {
+    //        SceneRef gameSceneRef = _runner.SceneManager.GetSceneRef("2.IngameScene");
+    //        _sceneManager.LoadScene(gameSceneRef, new NetworkLoadSceneParameters());
+    //    }
+    //}
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_LoadGameScene()
+    {
+        Debug.Log("[RoomManager] 모든 플레이어가 GameScene으로 이동");
+        if (_sceneManager != null && _runner != null)
+        {
+            SceneRef gameSceneRef = _sceneManager.GetSceneRef("GameScene");
+            _sceneManager.LoadScene(gameSceneRef, new NetworkLoadSceneParameters());
+        }
     }
 
     /// <summary>

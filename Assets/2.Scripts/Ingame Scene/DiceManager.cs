@@ -1,39 +1,48 @@
 using UnityEngine;
 using Fusion;
 
-public class DiceManager : MonoBehaviour
+public class DiceManager : NetworkBehaviour
 {
-    public static DiceManager _instance;
+    static DiceManager _uniqueInstance;
 
-    [SerializeField] Animator _dice1Animator, _dice2Animator;
-    [SerializeField] Transform _dice1Transform, _dice2Transform;
+    public static DiceManager _instance
+    {
+        get { return _uniqueInstance; }
+    }
 
-    [Networked] int _dice1Value { get; set; }
-    [Networked] int _dice2Value { get; set; }
+    private System.Random random = new System.Random();
+
+    [Networked] private int lastDiceValue { get; set; }
 
     void Awake()
     {
-        if (_instance == null)
+        if (_uniqueInstance != null && _uniqueInstance != this)
         {
-            _instance = this;
+            Destroy(gameObject);
+            return;
         }
-        _dice1Transform.position = new Vector3(-1.5f, 0.4f, 0);
-        _dice2Transform.position = new Vector3(1.5f, 0.4f, 0);
+        _uniqueInstance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     public void RollDice()
     {
-            _dice1Value = Random.Range(1, 7);
-            _dice2Value = Random.Range(1, 7);
+        if (!Object.HasInputAuthority) return;
+        RPC_RequestRollDice();
+    }
 
-            _dice1Animator.SetInteger("Value", _dice1Value);
-            _dice2Animator.SetInteger("Value", _dice2Value);
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void RPC_RequestRollDice()
+    {
+        int diceValue = random.Next(1, 7); // 1~6 랜덤 값 생성
+        lastDiceValue = diceValue;
+        Debug.Log($"[DiceManager] 주사위 굴림 결과: {diceValue}");
+        RPC_SendDiceResult(diceValue);
+    }
 
-            _dice1Animator.SetBool("IsRolling", true);
-            _dice2Animator.SetBool("IsRolling", true);
-
-            _dice1Transform.position = new Vector3(_dice1Transform.position.x, 0.4f, _dice1Transform.position.z);
-            _dice2Transform.position = new Vector3(_dice2Transform.position.x, 0.4f, _dice2Transform.position.z);
-        
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_SendDiceResult(int diceValue)
+    {
+        Debug.Log($"[DiceManager] 모든 플레이어에게 주사위 결과 전달: {diceValue}");
     }
 }
