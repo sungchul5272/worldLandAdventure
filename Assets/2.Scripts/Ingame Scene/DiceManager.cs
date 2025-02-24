@@ -1,48 +1,45 @@
-using UnityEngine;
 using Fusion;
+using UnityEngine;
+using System.Collections;
 
 public class DiceManager : NetworkBehaviour
 {
-    static DiceManager _uniqueInstance;
+    public static DiceManager _instance;
 
-    public static DiceManager _instance
-    {
-        get { return _uniqueInstance; }
-    }
-
+    [SerializeField] private Animator diceAnimator;
     private System.Random random = new System.Random();
-
-    [Networked] private int lastDiceValue { get; set; }
 
     void Awake()
     {
-        if (_uniqueInstance != null && _uniqueInstance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        _uniqueInstance = this;
-        DontDestroyOnLoad(gameObject);
-    }
-
-    public void RollDice()
-    {
-        if (!Object.HasInputAuthority) return;
-        RPC_RequestRollDice();
+        if (_instance == null)
+            _instance = this;
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    private void RPC_RequestRollDice()
+    public void RPC_RequestRollDice()
     {
-        int diceValue = random.Next(1, 7); // 1~6 랜덤 값 생성
-        lastDiceValue = diceValue;
-        Debug.Log($"[DiceManager] 주사위 굴림 결과: {diceValue}");
+        if (!Object.HasStateAuthority) return;
+
+        int diceValue = random.Next(1, 7);
+        Debug.Log($"[DiceManager] 서버에서 주사위 값 생성: {diceValue}");
+
         RPC_SendDiceResult(diceValue);
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RPC_SendDiceResult(int diceValue)
     {
-        Debug.Log($"[DiceManager] 모든 플레이어에게 주사위 결과 전달: {diceValue}");
+        Debug.Log($"[DiceManager] 모든 클라이언트에서 주사위 결과 적용: {diceValue}");
+        StartCoroutine(PlayDiceAnimation(diceValue));
+    }
+
+    private IEnumerator PlayDiceAnimation(int diceValue)
+    {
+        diceAnimator.SetBool("IsRolling", true);
+        yield return new WaitForSeconds(1.5f);
+        diceAnimator.SetBool("IsRolling", false);
+        diceAnimator.SetInteger("Value", diceValue);
+
+        TurnManager._instance.EndTurn();
     }
 }

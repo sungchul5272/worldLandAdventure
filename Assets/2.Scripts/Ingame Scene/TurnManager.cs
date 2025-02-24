@@ -1,84 +1,61 @@
-using System.Collections;
-using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class TurnManager : NetworkBehaviour
 {
-    static TurnManager _uniqueInstance;
+    public static TurnManager _instance;
 
-    public static TurnManager _instance
-    {
-        get { return _uniqueInstance; }
-    }
+    [Networked] private int currentTurnIndex { get; set; } = 0;
+    [Networked] private int totalPlayers { get; set; } = 0;
 
-    [Networked] private int _currentTurnPlayerIndex { get; set; } = 0;
-    [Networked] private int _totalPlayers { get; set; } = 0;
-
-    [SerializeField] GameObject _turnTextUI; // 턴 알림 UI
-    Text _turnText;
-    public Button nextTurnButton;
+    [Networked, Capacity(4)] private NetworkArray<PlayerRef> playerTurnOrder { get; }
 
     void Awake()
     {
-        if (_uniqueInstance != null && _uniqueInstance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        _uniqueInstance = this;
-        DontDestroyOnLoad(gameObject);
-    }
-
-    void Start()
-    {
-        if (nextTurnButton != null)
-        {
-            nextTurnButton.onClick.AddListener(EndTurn);
-        }
+        if (_instance == null) _instance = this;
     }
 
     public override void Spawned()
     {
-        if (Object.HasStateAuthority)
-        {
-            _totalPlayers = Runner.SessionInfo.PlayerCount;
-            StartTurn();
-        }
-    }
+        if (!Object.HasStateAuthority) return;
 
-    void StartTurn()
-    {
-        if (Object.HasStateAuthority)
-        {
-            Debug.Log($"[TurnManager] 플레이어 {_currentTurnPlayerIndex}의 턴 시작");
-            RPC_UpdateTurn(_currentTurnPlayerIndex);
-        }
+        totalPlayers = Runner.SessionInfo.PlayerCount;
+
+        int index = 0;
+        foreach (var player in Runner.ActivePlayers)
+            playerTurnOrder.Set(index++, player);
+
+        currentTurnIndex = 0;
+
+        Debug.Log($"[TurnManager] 첫 번째 플레이어: {GetCurrentTurnPlayer()}");
+        RPC_UpdateUI();
     }
 
     public void EndTurn()
     {
         if (!Object.HasStateAuthority) return;
 
-        _currentTurnPlayerIndex = (_currentTurnPlayerIndex + 1) % _totalPlayers;
-        StartTurn();
+        currentTurnIndex = (currentTurnIndex + 1) % totalPlayers;
+        Debug.Log($"[TurnManager] 다음 턴: {GetCurrentTurnPlayer()}");
+
+        RPC_UpdateUI();
+    }
+
+    public PlayerRef GetCurrentTurnPlayer()
+    {
+        return playerTurnOrder[currentTurnIndex];
+    }
+
+    public bool IsMyTurn()
+    {
+        return Runner.LocalPlayer == GetCurrentTurnPlayer();
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    void RPC_UpdateTurn(int playerIndex)
+    private void RPC_UpdateUI()
     {
-        Debug.Log($"[TurnManager] 현재 턴: 플레이어 {playerIndex}");
-    }
-
-    private IEnumerator ShowTurnUI(int playerIndex)
-    {
-        if (_turnTextUI != null && _turnText != null)
-        {
-            _turnTextUI.SetActive(true);
-            _turnText.text = "Your Turn!!!!!";
-            yield return new WaitForSeconds(2f);
-            _turnTextUI.SetActive(false);
-        }
+        bool isMyTurn = IsMyTurn();
+        Debug.Log($"[TurnManager] UI 업데이트 - 내 턴인가? {isMyTurn}");
+        IngameManager._instance.SetDiceButtonState(isMyTurn);
     }
 }

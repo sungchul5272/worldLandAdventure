@@ -197,7 +197,7 @@ public class UIManager : MonoBehaviour
     }
     void ReadyGame()
     {
-        PlayerManager.LocalInstance.ToggleReadyState();
+        PlayerManager._instance.ToggleReadyState();
         Debug.Log("ทนต๐");
     }
     void LeaveRoom()

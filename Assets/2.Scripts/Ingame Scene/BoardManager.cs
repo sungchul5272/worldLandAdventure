@@ -7,7 +7,7 @@ public class BoardManager : NetworkBehaviour
 {
     public static BoardManager _instance;
 
-    [SerializeField] Transform[] _boardTiles;
+    [SerializeField] public Transform[] _boardTiles;
 
     void Awake()
     {

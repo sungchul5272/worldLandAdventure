@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerManager : NetworkBehaviour
 {
-    public static PlayerManager LocalInstance { get; set; }
+    public static PlayerManager _instance { get; set; }
     public string LocalPlayerName { get; set; } = "Guest";
 
     [Networked] public NetworkString<_16> playerName { get; set; }
@@ -14,22 +14,19 @@ public class PlayerManager : NetworkBehaviour
 
     void Awake()
     {
-        if (LocalInstance == null)
+        if (_instance == null)
         {
-            LocalInstance = this; //  미리 LocalInstance 설정
+            _instance = this; //  미리 LocalInstance 설정
             DontDestroyOnLoad(gameObject);
         }
-        Debug.Log("[PlayerManager] Awake() 호출됨. 오브젝트가 생성됨.");
     }
 
     public override void Spawned()
     {
-        Debug.Log("[PlayerManager] Spawned() 호출됨.");
 
         if (Object.HasInputAuthority)
         {
-            LocalInstance = this;
-            Debug.Log("[PlayerManager] 로컬 인스턴스 설정 완료.");
+            _instance = this;
             Invoke(nameof(SetLocalPlayerName), 0.2f);
         }
 
@@ -54,7 +51,6 @@ public class PlayerManager : NetworkBehaviour
             return;
         }
 
-        Debug.Log("[PlayerManager] 플레이어 이름 설정 요청: " + name);
         RPC_SetPlayerName(name);
     }
 
@@ -88,6 +84,45 @@ public class PlayerManager : NetworkBehaviour
     {
         isReady = readyState;
         RoomManager._instance.UpdateAllClientsUI();
+    }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    public void RPC_RequestSceneChange()
+    {
+        if (Object.HasStateAuthority)
+        {
+            RPC_ExecuteSceneChange();
+        }
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_ExecuteSceneChange()
+    {
+        if (Runner.SceneManager != null)
+        {
+            SceneRef gameSceneRef = Runner.SceneManager.GetSceneRef("2.IngameScene");
+            SceneRef startSceneRef = Runner.SceneManager.GetSceneRef("1.StartScene");
+            Runner.SceneManager.LoadScene(gameSceneRef, new NetworkLoadSceneParameters());
+            Runner.SceneManager.UnloadScene(startSceneRef);
+        }
+    }
+
+    public void RequestRollDice()
+    {
+        if (!Object.HasInputAuthority) return;
+        if (!TurnManager._instance.IsMyTurn()) return;
+
+        Debug.Log($"[PlayerManager] {playerName}가 주사위 굴리기 요청");
+        RPC_RequestRollDice();
+    }
+
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    public void RPC_RequestRollDice()
+    {
+        if (!Object.HasStateAuthority) return;
+        Debug.Log("[PlayerManager] 서버가 주사위 굴리기 실행");
+        DiceManager._instance.RPC_RequestRollDice();
     }
 }
 

@@ -40,11 +40,15 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (_uniqueInstance != null && _uniqueInstance != this)
         {
+            Debug.Log("[RoomManager] 중복된 인스턴스 제거");
             Destroy(gameObject);
             return;
         }
+
         _uniqueInstance = this;
         DontDestroyOnLoad(gameObject);
+
+        Debug.Log("[RoomManager] RoomManager 생성됨");
     }
     void Start()
     {
@@ -57,32 +61,13 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (_runner != null && _runner.IsServer)
         {
-            Debug.Log("[RoomManager] 게임 시작 - 씬 변경 중");
-            RPC_LoadGameScene();
+            Debug.Log("[RoomManager] 게임 시작 - 호스트가 씬 변경을 시작함");
+            PlayerManager._instance.RPC_RequestSceneChange();
         }
     }
+    // 서버 -> 모든 클라이언트로 씬 변경 실행
+ 
 
-    //[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    //private void RPC_LoadGameScene()
-    //{
-    //    Debug.Log("[RoomManager] 모든 플레이어가 GameScene으로 이동");
-    //    if (_sceneManager != null && _runner != null)
-    //    {
-    //        SceneRef gameSceneRef = _runner.SceneManager.GetSceneRef("2.IngameScene");
-    //        _sceneManager.LoadScene(gameSceneRef, new NetworkLoadSceneParameters());
-    //    }
-    //}
-
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void RPC_LoadGameScene()
-    {
-        Debug.Log("[RoomManager] 모든 플레이어가 GameScene으로 이동");
-        if (_sceneManager != null && _runner != null)
-        {
-            SceneRef gameSceneRef = _sceneManager.GetSceneRef("GameScene");
-            _sceneManager.LoadScene(gameSceneRef, new NetworkLoadSceneParameters());
-        }
-    }
 
     /// <summary>
     /// 방 생성 (호스트)
@@ -376,7 +361,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             string playerName = PlayerData._instance.GetPlayerName();
             SpawnNetworkPlayer(runner, player, playerName);
-            PlayerManager.LocalInstance.isReady = true;
+            PlayerManager._instance.isReady = true;
         }
 
         UpdateAllClientsUI();
