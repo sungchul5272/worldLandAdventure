@@ -79,7 +79,7 @@ public class PlayerManager : NetworkBehaviour
     }
 
 
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    [Rpc(RpcSources.All, RpcTargets.All)]
     void RPC_SetReadyState(bool readyState)
     {
         isReady = readyState;
@@ -105,24 +105,6 @@ public class PlayerManager : NetworkBehaviour
             Runner.SceneManager.LoadScene(gameSceneRef, new NetworkLoadSceneParameters());
             Runner.SceneManager.UnloadScene(startSceneRef);
         }
-    }
-
-    public void RequestRollDice()
-    {
-        if (!Object.HasInputAuthority) return;
-        if (!TurnManager._instance.IsMyTurn()) return;
-
-        Debug.Log($"[PlayerManager] {playerName}가 주사위 굴리기 요청");
-        RPC_RequestRollDice();
-    }
-
-
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    public void RPC_RequestRollDice()
-    {
-        if (!Object.HasStateAuthority) return;
-        Debug.Log("[PlayerManager] 서버가 주사위 굴리기 실행");
-        DiceManager._instance.RPC_RequestRollDice();
     }
 }
 

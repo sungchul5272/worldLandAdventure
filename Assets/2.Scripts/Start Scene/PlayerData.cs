@@ -19,7 +19,6 @@ public class PlayerData : MonoBehaviour
             return;
         }
         _uniqueInstance = this;
-        DontDestroyOnLoad(gameObject);
     }
     public void SetPlayerName(string name)
     {

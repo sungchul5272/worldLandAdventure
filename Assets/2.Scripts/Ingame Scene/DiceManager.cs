@@ -1,45 +1,44 @@
-using Fusion;
 using UnityEngine;
 using System.Collections;
 
-public class DiceManager : NetworkBehaviour
+public class DiceManager : MonoBehaviour
 {
-    public static DiceManager _instance;
+	static DiceManager _uniqueInstance;
 
-    [SerializeField] private Animator diceAnimator;
-    private System.Random random = new System.Random();
+	public static DiceManager _instance
+	{
+		get { return _uniqueInstance; }
+	}
 
-    void Awake()
-    {
-        if (_instance == null)
-            _instance = this;
-    }
+	[SerializeField] Animator _animator;
+	float resetDelay = 1.0f;
 
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    public void RPC_RequestRollDice()
-    {
-        if (!Object.HasStateAuthority) return;
+	void Awake()
+	{
+		_uniqueInstance = this;
+	}
 
-        int diceValue = random.Next(1, 7);
-        Debug.Log($"[DiceManager] 서버에서 주사위 값 생성: {diceValue}");
+	public int RollDice()
+	{
+		int result = Random.Range(1, 7);
+		PlayDiceAnimation(result);
+		return result;
+	}
 
-        RPC_SendDiceResult(diceValue);
-    }
+	public void PlayDiceAnimation(int result)
+	{
+		if (_animator != null)
+		{
+			_animator.SetInteger("Value", result);
+			_animator.SetBool("IsRolling", true);
+			StartCoroutine(ResetIsRollingAfterDelay());
+		}
+	}
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void RPC_SendDiceResult(int diceValue)
-    {
-        Debug.Log($"[DiceManager] 모든 클라이언트에서 주사위 결과 적용: {diceValue}");
-        StartCoroutine(PlayDiceAnimation(diceValue));
-    }
-
-    private IEnumerator PlayDiceAnimation(int diceValue)
-    {
-        diceAnimator.SetBool("IsRolling", true);
-        yield return new WaitForSeconds(1.5f);
-        diceAnimator.SetBool("IsRolling", false);
-        diceAnimator.SetInteger("Value", diceValue);
-
-        TurnManager._instance.EndTurn();
-    }
+	IEnumerator ResetIsRollingAfterDelay()
+	{
+		yield return new WaitForSeconds(resetDelay);
+		if (_animator != null)
+			_animator.SetBool("IsRolling", false);
+	}
 }

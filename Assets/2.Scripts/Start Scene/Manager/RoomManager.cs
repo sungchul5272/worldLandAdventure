@@ -40,7 +40,6 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (_uniqueInstance != null && _uniqueInstance != this)
         {
-            Debug.Log("[RoomManager] 중복된 인스턴스 제거");
             Destroy(gameObject);
             return;
         }
@@ -48,7 +47,6 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
         _uniqueInstance = this;
         DontDestroyOnLoad(gameObject);
 
-        Debug.Log("[RoomManager] RoomManager 생성됨");
     }
     void Start()
     {
