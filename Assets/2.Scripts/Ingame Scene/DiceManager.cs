@@ -18,11 +18,10 @@ public class DiceManager : MonoBehaviour
 		_uniqueInstance = this;
 	}
 
-	public int RollDice()
+	public void RollDice()
 	{
 		int result = Random.Range(1, 7);
 		PlayDiceAnimation(result);
-		return result;
 	}
 
 	public void PlayDiceAnimation(int result)

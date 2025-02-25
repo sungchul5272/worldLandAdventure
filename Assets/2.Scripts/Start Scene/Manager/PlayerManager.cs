@@ -10,6 +10,7 @@ public class PlayerManager : NetworkBehaviour
     [Networked] public NetworkString<_16> playerName { get; set; }
     [Networked] public bool isReady { get; set; }
 
+
     //static List<PlayerManager> _allPlayersList = new List<PlayerManager>();
 
     void Awake()
@@ -34,6 +35,7 @@ public class PlayerManager : NetworkBehaviour
         {
             RoomManager._instance.UpdateAllClientsUI();
         }
+
     }
 
 

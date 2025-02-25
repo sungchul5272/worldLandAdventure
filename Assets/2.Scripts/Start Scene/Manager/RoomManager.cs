@@ -33,6 +33,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
     NetworkRunner _runner;
     NetworkSceneManagerDefault _sceneManager;
 
+
     int _maxPlayers = 4;
     int _currentPlayer;
 
@@ -63,13 +64,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
             PlayerManager._instance.RPC_RequestSceneChange();
         }
     }
-    // 서버 -> 모든 클라이언트로 씬 변경 실행
- 
 
-
-    /// <summary>
-    /// 방 생성 (호스트)
-    /// </summary>
     public async Task<bool> OpenRoom(string sessionCode)
     {
         if (_runner == null)
@@ -164,41 +159,6 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
         ResetUI();
     }
 
-
-    public void SpawnNetworkPlayer1(NetworkRunner runner, PlayerRef playerRef, string playerName)
-    {
-        if (_runner == null || playerPrefab == null)
-        {
-            Debug.LogError("[RoomManager] 네트워크 러너 또는 플레이어 프리팹이 설정되지 않음.");
-            return;
-        }
-
-        Debug.Log($"[RoomManager] 플레이어 생성 중... {playerRef}");
-
-        Vector3 spawnPosition = new Vector3(UnityEngine.Random.Range(-3, 3), 1, UnityEngine.Random.Range(-3, 3));
-        NetworkObject playerObject = _runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, playerRef);
-
-        if (playerObject == null)
-        {
-            Debug.LogError("[RoomManager] 플레이어 네트워크 오브젝트 생성 실패!");
-            return;
-        }
-
-        Debug.Log("[RoomManager] 네트워크 오브젝트가 생성됨. PlayerManager를 찾는 중...");
-
-        PlayerManager playerManager = playerObject.GetComponent<PlayerManager>();
-        if (playerManager != null)
-        {
-            Debug.Log($"[RoomManager] 플레이어 생성 완료: {playerName}");
-
-            //  이제 여기서는 `RequestSetPlayerName()`을 실행하지 않음!
-            // 플레이어가 `Spawned()`에서 InputAuthority를 받은 후 실행됨.
-        }
-        else
-        {
-            Debug.LogError("[RoomManager] PlayerManager를 찾을 수 없음! 프리팹 설정을 확인하세요.");
-        }
-    }
     public void SpawnNetworkPlayer(NetworkRunner runner, PlayerRef playerRef, string playerName)
     {
         if (!runner.IsServer)
@@ -219,53 +179,13 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 
 
 
-
-    /// <summary>
-    /// 모든 클라이언트 UI 갱신 (네트워크 RPC)
-    /// </summary>
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     public void UpdateAllClientsUI()
     {
         RefreshPlayerListUI();
     }
 
-    /// <summary>
-    /// 플레이어 리스트 UI 갱신
-    /// </summary>
-    void RefreshPlayerListUI1()
-    {
-        foreach (var obj in _playerList)
-        {
-            obj.SetActive(false);
-        }
 
-        _currentPlayer = _runner.ActivePlayers.Count();
-        _playerCount.text = $"({_currentPlayer}/{_maxPlayers})"; 
-
-        int index = 0;
-        foreach (var player in _runner.ActivePlayers)
-        {
-            if (index >= _playerList.Length)
-            {
-                break;
-            }
-
-
-            _playerList[index].SetActive(true);
-            Text nameText = _playerList[index].transform.GetChild(0).GetComponent<Text>();
-            Image readyImage = _playerList[index].transform.GetChild(1).GetComponent<Image>();
-
-            PlayerManager playerManager = FindObjectsOfType<PlayerManager>().FirstOrDefault(p => p.Object.InputAuthority == player);
-            if (playerManager != null)
-            {
-                nameText.text = playerManager.playerName.ToString();
-                readyImage.sprite = playerManager.isReady ? _readySprite : _unreadySprite;
-            }
-            index++;
-        }
-
-        Debug.Log($"[RoomManager] 플레이어 리스트 UI 업데이트 완료! 현재 플레이어 수: {_currentPlayer}/{_maxPlayers}");
-    }
     void RefreshPlayerListUI()
     {
         foreach (var obj in _playerList) obj.SetActive(false);
@@ -283,7 +203,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
         }
 
         int index = 0;
-        bool needRetry = false; // UI를 다시 갱신해야 하는지 여부
+        bool needRetry = false; 
 
         foreach (var player in _runner.ActivePlayers)
         {
@@ -301,7 +221,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
                 }
                 else
                 {
-                    nameText.text = "Loading..."; // 아직 동기화되지 않았다면 "Loading..."
+                    nameText.text = "Loading...";
                     needRetry = true;
                 }
 
@@ -317,7 +237,6 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
             index++;
         }
 
-        // 만약 일부 플레이어의 `playerName`이 아직 동기화되지 않았다면, 0.5초 후 다시 실행
         if (needRetry)
         {
             Invoke(nameof(RefreshPlayerListUI), 0.5f);
@@ -334,9 +253,10 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
         _playerCount.text = "(0/4)";
 
         foreach (var obj in _playerList)
+        {
             obj.SetActive(false);
-
-        Debug.Log("UI 초기화 완료.");
+        }
+            
     }
 
     // ------------------CallBack 함수들----------------------------------------------------------------
