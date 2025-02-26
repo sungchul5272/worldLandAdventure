@@ -4,114 +4,160 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class IngameManager : NetworkBehaviour
 {
-    static IngameManager _uniqueInstance;
+	static IngameManager _uniqueInstance;
+	public static IngameManager _instance { get { return _uniqueInstance; } }
 
-    public static IngameManager _instance
-    {
-        get { return _uniqueInstance; }
-    }
+	[Networked] public int _currentTurnIndex { get; set; }
+	[Networked] public int _diceResult { get; set; }
 
-    // 네트워크 동기화할 변수들
-    [Networked] public int _diceResult { get; set; }
-    [Networked] public int _currentTurnIndex { get; set; }
-    [Networked] public int _playerCount { get; set; }
-    [Networked] public int LocalPlayerIndex { get; set; } // 각 클라이언트의 순번
-    [Networked, Capacity(4)] public NetworkLinkedList<PlayerRef> Players { get; }
+	[Networked, Capacity(8)] public NetworkLinkedList<PlayerRef> _playerList { get; }
 
-    [SerializeField] Button _rollDiceButton;
-    [SerializeField] GameObject[] _characterObjects;
+	[SerializeField] Button _rollDiceButton;
+	[SerializeField] Animator diceAnimator;
+	[SerializeField] GameObject[] _characterObjects;
+	[SerializeField] Transform[] _spawnPos;
+	bool _isInitialized = false;
+	float _animationDelayTime = 1f;
 
-    int _localPlayerIndex;
-    bool hasSpawned = false;
+	void Awake()
+	{
+		_uniqueInstance = this;
+		Debug.Log("IngameManager 실행됨");
+	}
 
-    void Awake()
-    {
-        _uniqueInstance = this;
-        Debug.Log("실행됨");
+	public override void Spawned()
+	{
+		if (Object.HasStateAuthority)
+		{
+			List<PlayerRef> players = new List<PlayerRef>(Runner.ActivePlayers);
+			SortPlayerRefs(players);
+			_playerList.Clear();
+			foreach (var player in players)
+			{
+				_playerList.Add(player);
+			}
 
-        // NetworkRunner가 씬 전환 시 삭제되지 않도록 설정
-        if (Runner != null)
-        {
-            DontDestroyOnLoad(Runner.gameObject);
-        }
-    }
-
-    public override void Spawned()
-    {
-        hasSpawned = true;
-
-        if (Object.HasStateAuthority) // 호스트만 실행
-        {
-            // 플레이어 리스트 초기화
-            Players.Clear();
-            foreach (var player in Runner.ActivePlayers)
-            {
-                Players.Add(player);
-            }
-
-            // 각 클라이언트에게 순번 할당
-            for (int i = 0; i < Players.Count; i++)
-            {
-                RPC_SetPlayerIndex(Players[i], i);
-            }
-
-            // 초기 턴 설정
-            _currentTurnIndex = UnityEngine.Random.Range(0, Players.Count);
-            InitializeTurn(Players.Count, _currentTurnIndex);
-        }
-    }
-
-    void Update()
-    {
-        if (!hasSpawned) return;
-
-        // 현재 턴인 플레이어의 PlayerRef
-        PlayerRef currentTurnPlayer = Players[_currentTurnIndex];
-
-        // 로컬 플레이어가 현재 턴인지 확인
-        _rollDiceButton.interactable = (Runner.LocalPlayer == currentTurnPlayer);
-    }
-
-    public void OnRollDiceButtonClicked()
-    {
-        RPC_RequestDiceRoll();
-        ChangeTurn();
-    }
-
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_RequestDiceRoll()
-    {
-
-        DiceManager._instance.RollDice();
-
-    }
+			if (players.Count > 0)
+			{
+				_currentTurnIndex = UnityEngine.Random.Range(0, players.Count);
+			}
+			else
+			{
+				_currentTurnIndex = 0;
+			}
+			_diceResult = 0;
+			Debug.LogFormat("시작 턴 인덱스 : {0}", _currentTurnIndex);
+		}
+		_isInitialized = true;
 
 
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_SetPlayerIndex(PlayerRef player, int index)
-    {
-        if (player == Runner.LocalPlayer)
-        {
-            LocalPlayerIndex = index; // 로컬 플레이어의 순번 저장
-            Debug.Log($"I am player {LocalPlayerIndex + 1}");
-        }
-    }
+	}
 
-    // 턴 초기화
-    public void InitializeTurn(int playerCount, int startingTurn)
-    {
-        _playerCount = playerCount;
-        _currentTurnIndex = startingTurn;
-        Debug.Log($"Turn initialized. Current turn: Player {_currentTurnIndex + 1}");
-    }
 
-    // 턴 변경
-    public void ChangeTurn()
-    {
-        _currentTurnIndex = (_currentTurnIndex + 1) % Players.Count;
-        Debug.Log($"Turn changed to player {_currentTurnIndex + 1}");
-    }
+	public void OnRollDiceButtonClicked()
+	{
+		RPC_RequestDiceRoll();
+	}
+
+	[Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+	private void RPC_RequestDiceRoll(RpcInfo info = default)
+	{
+		if (!Object.HasStateAuthority)
+		{
+			return;
+		}
+		if (_currentTurnIndex < 0 || _currentTurnIndex >= _playerList.Count)
+		{
+			return;
+		}
+
+
+		PlayerRef expectedPlayer = GetPlayerAtIndex(_currentTurnIndex);
+
+		int callerId = info.Source.PlayerId;
+		if (callerId < 0)
+		{
+			callerId = Runner.LocalPlayer.PlayerId;
+		}
+
+		if (callerId != expectedPlayer.PlayerId)
+		{
+			return;
+		}
+
+		int roll = UnityEngine.Random.Range(1, 7);
+		_diceResult = roll;
+		Debug.LogFormat("주사위굴림 값 : {0} ", roll);
+
+		RPC_PlayDiceAnimation(roll);
+
+		ChangeTurn();
+	}
+
+
+	[Rpc(RpcSources.All, RpcTargets.All)]
+	void RPC_PlayDiceAnimation(int roll, RpcInfo info = default)
+	{
+		if (diceAnimator != null)
+		{
+			diceAnimator.SetInteger("Value", roll);
+			diceAnimator.SetBool("IsRolling", true);
+			StartCoroutine(ResetIsRollingAfterDelay());
+		}
+	}
+
+	IEnumerator ResetIsRollingAfterDelay()
+	{
+		yield return new WaitForSeconds(_animationDelayTime);
+		if (diceAnimator != null)
+			diceAnimator.SetBool("IsRolling", false);
+	}
+
+	void ChangeTurn()
+	{
+		int count = _playerList.Count;
+		if (count == 0) return;
+
+		_currentTurnIndex = (_currentTurnIndex + 1) % count;
+		Debug.LogFormat("턴 종료 다음 플레이어 인덱스 : {0} ", _currentTurnIndex);
+	}
+
+	PlayerRef GetPlayerAtIndex(int index)
+	{
+		int i = 0;
+		foreach (var player in _playerList)
+		{
+			if (i == index)
+				return player;
+			i++;
+		}
+		Debug.LogWarning($"GetPlayerAtIndex: Index {index} not found. PlayerList.Count = {_playerList.Count}");
+		return default;
+	}
+
+
+	void SortPlayerRefs(List<PlayerRef> players)
+	{
+		int count = players.Count;
+		for (int i = 0; i < count - 1; i++)
+		{
+			for (int j = 0; j < count - i - 1; j++)
+			{
+				if (players[j].PlayerId > players[j + 1].PlayerId)
+				{
+					PlayerRef temp = players[j];
+					players[j] = players[j + 1];
+					players[j + 1] = temp;
+				}
+			}
+		}
+	}
+
+
+
+
 }

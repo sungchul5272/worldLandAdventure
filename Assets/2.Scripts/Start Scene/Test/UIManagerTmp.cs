@@ -5,7 +5,7 @@ using System.Collections;
 using System.Threading.Tasks;
 using System.Threading;
 
-public class UIManager : MonoBehaviour
+public class UIManagerTmp : MonoBehaviour
 {
     [Header("사용자 입력 정보")]
     [SerializeField] InputField _inputName;
@@ -33,7 +33,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] Text _connectWaitText;
     public string _playerName { get; set; }
     string _sessionCode;
-    bool _isHost;
     bool _isConnecting;
 
 
@@ -41,7 +40,6 @@ public class UIManager : MonoBehaviour
     {
         ChangeUI("Start Screen");
         ResetButton();
-        _isHost = false;
         _isConnecting = false;
     }
 
@@ -86,7 +84,7 @@ public class UIManager : MonoBehaviour
         }
 
         string playerName = _inputName.text.Trim();
-        PlayerData._instance.SetPlayerName(playerName);
+        PlayerDataTmp.Instance.SetPlayerName(playerName);
         ChangeUI("Lobby Screen");
     }
     void LobbyToOption()
@@ -117,14 +115,13 @@ public class UIManager : MonoBehaviour
         ShowConnectingUI();
         _sessionCode = _sessionCodeHost.text;
 
-        bool success = await RoomManager._instance.OpenRoom(_sessionCode);
+        bool success = await RoomManagerTmp._instance.OpenRoom(_sessionCode);
         HideConnectingUI();
 
         if (success)
         {
             ChangeUI("Waiting Room Screen");
             _startGameBtn.gameObject.SetActive(true);
-            _isHost = true;
 
         }
         else
@@ -144,7 +141,7 @@ public class UIManager : MonoBehaviour
         ShowConnectingUI();
         _sessionCode = _sessionCodeJoin.text;
 
-        bool success = await RoomManager._instance.JoinRoom(_sessionCode);
+        bool success = await RoomManagerTmp._instance.JoinRoom(_sessionCode);
         HideConnectingUI();
 
         if (success)
@@ -196,14 +193,12 @@ public class UIManager : MonoBehaviour
     }
     void ReadyGame()
     {
-        PlayerManager._instance.ToggleReadyState();
         Debug.Log("레디");
     }
     void LeaveRoom()
     {
-        RoomManager._instance.LeaveRoom();
+        RoomManagerTmp._instance.LeaveRoom();
 
-        _isHost = false;
         _startGameBtn.gameObject.SetActive(false);
         _ReadyBtn.gameObject.SetActive(false);
 

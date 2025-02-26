@@ -473,6 +473,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 31343295}
   m_CullTransparentMesh: 1
+--- !u!1 &44658127
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 44658128}
+  - component: {fileID: 44658129}
+  m_Layer: 0
+  m_Name: RoomTmp
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &44658128
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 44658127}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1376673629}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &44658129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 44658127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f84e49001c1c948b6790e3a96a8d36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _runnerPrefab: {fileID: 4907158616686517674, guid: b1960f5135d3980408c71100ee6c87fe, type: 3}
+  _playerPrefab: {fileID: 7186500471938678273, guid: 7890cb7592cf573418c849b4361b1977, type: 3}
 --- !u!1 &67416474
 GameObject:
   m_ObjectHideFlags: 0
@@ -2155,6 +2201,7 @@ GameObject:
   - component: {fileID: 555997446}
   - component: {fileID: 555997445}
   - component: {fileID: 555997449}
+  - component: {fileID: 555997450}
   m_Layer: 5
   m_Name: MainUI
   m_TagString: Untagged
@@ -2259,7 +2306,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 555997443}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 22d5119844ef909459b34d3de1495eaa, type: 3}
   m_Name: 
@@ -2281,6 +2328,43 @@ MonoBehaviour:
   _backToLobbyBtn:
   - {fileID: 1425829683}
   - {fileID: 406134644}
+  _backToSelectModeBtn:
+  - {fileID: 1141873044}
+  - {fileID: 1145590363}
+  _exitBtns:
+  - {fileID: 474071943}
+  - {fileID: 1628399558}
+  _connectWaitScreen: {fileID: 281146256}
+  _connectWaitText: {fileID: 2008649494}
+--- !u!114 &555997450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555997443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fec75f252e00644ea16dbd8f3fade98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _inputName: {fileID: 2119208805}
+  _sessionCodeHost: {fileID: 1195752844}
+  _sessionCodeJoin: {fileID: 163182014}
+  _enterBtn: {fileID: 195182514}
+  _startBtn: {fileID: 1100574171}
+  _optionBtn: {fileID: 570623327}
+  _hostBtn: {fileID: 219453340}
+  _joinBtn: {fileID: 826717538}
+  _createRoomBtn: {fileID: 31343297}
+  _joinRoomBtn: {fileID: 501686098}
+  _startGameBtn: {fileID: 140793536}
+  _ReadyBtn: {fileID: 1145692992}
+  _leaveRoomBtn: {fileID: 1291262211}
+  _cansleBtn: {fileID: 780732795}
+  _backToLobbyBtn:
+  - {fileID: 406134644}
+  - {fileID: 1425829683}
   _backToSelectModeBtn:
   - {fileID: 1141873044}
   - {fileID: 1145590363}
@@ -6315,6 +6399,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1844257505}
+  - {fileID: 44658128}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -8916,7 +9001,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1844257505
 Transform:
   m_ObjectHideFlags: 0
@@ -8956,6 +9041,7 @@ MonoBehaviour:
   startGameButton: {fileID: 140793536}
   _readySprite: {fileID: 21300000, guid: 149c2f118f877344884ff4af1ac66e02, type: 3}
   _unreadySprite: {fileID: 21300000, guid: 576cfb971eff8ce40877bb3cefeddef4, type: 3}
+  _runner: {fileID: 0}
 --- !u!1 &1888963212
 GameObject:
   m_ObjectHideFlags: 0

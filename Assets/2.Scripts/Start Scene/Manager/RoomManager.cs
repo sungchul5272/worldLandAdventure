@@ -30,7 +30,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] Sprite _unreadySprite;
 
 
-    NetworkRunner _runner;
+    public NetworkRunner _runner;
     NetworkSceneManagerDefault _sceneManager;
 
 
@@ -60,7 +60,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (_runner != null && _runner.IsServer)
         {
-            Debug.Log("[RoomManager] 게임 시작 - 호스트가 씬 변경을 시작함");
+            Debug.Log("게임 시작 - 호스트가 시작함");
             PlayerManager._instance.RPC_RequestSceneChange();
         }
     }
@@ -97,9 +97,6 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 
         string playerName = PlayerData._instance.GetPlayerName();
 
-
-        Debug.Log($"[RoomManager] 호스트 플레이어 이름 설정: {playerName}");
-
         return true;
     }
 
@@ -131,10 +128,10 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 
         _sessionCode.text = sessionCode;
 
-        Debug.Log("[RoomManager] 클라이언트 방 참가 성공!");
+        Debug.Log("클라이언트 방 참가 성공!");
 
         string playerName = PlayerData._instance.GetPlayerName();
-        Debug.Log($"[RoomManager] 클라이언트 플레이어 이름 설정: {playerName}");
+        Debug.Log($"클라이언트 플레이어 이름 설정: {playerName}");
 
         return true;
     }
@@ -163,11 +160,11 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (!runner.IsServer)
         {
-            Debug.LogWarning("[RoomManager] 클라이언트는 네트워크 오브젝트를 직접 생성할 수 없습니다.");
+            Debug.Log("클라이언트는 네트워크 오브젝트를 직접 생성할 수 없습니다.");
             return;
         }
 
-        Debug.Log($"[RoomManager] 플레이어 생성 중... {playerRef}");
+        Debug.Log($"플레이어 생성 중... {playerRef}");
 
         NetworkObject networkPlayer = runner.Spawn(playerPrefab, Vector3.zero, Quaternion.identity, playerRef);
         if (networkPlayer != null)
@@ -208,7 +205,8 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
         foreach (var player in _runner.ActivePlayers)
         {
             if (index >= _playerList.Length) break;
-
+            int playerRef = player.PlayerId;
+            Debug.Log(playerRef);
             _playerList[index].SetActive(true);
             Text nameText = _playerList[index].transform.GetChild(0).GetComponent<Text>();
             Image readyImage = _playerList[index].transform.GetChild(1).GetComponent<Image>();
@@ -242,7 +240,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
             Invoke(nameof(RefreshPlayerListUI), 0.5f);
         }
 
-        Debug.Log($"[RoomManager] 플레이어 리스트 UI 업데이트 완료! 현재 플레이어 수: {_currentPlayer}/{_maxPlayers}");
+        Debug.Log($"플레이어 리스트 UI 업데이트 완료! 현재 플레이어 수: {_currentPlayer}/{_maxPlayers}");
     }
 
 
@@ -273,7 +271,7 @@ public class RoomManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log($"[RoomManager] 플레이어 참가: {player}");
+        Debug.Log($"플레이어 참가!: {player}");
 
         if (runner.IsServer)
         {
