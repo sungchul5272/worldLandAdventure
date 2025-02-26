@@ -84,7 +84,7 @@ public class UIManagerTmp : MonoBehaviour
         }
 
         string playerName = _inputName.text.Trim();
-        PlayerDataTmp.Instance.SetPlayerName(playerName);
+        PlayerDataTmp._instance.SetPlayerName(playerName);
         ChangeUI("Lobby Screen");
     }
     void LobbyToOption()

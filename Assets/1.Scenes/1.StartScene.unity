@@ -519,6 +519,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _runnerPrefab: {fileID: 4907158616686517674, guid: b1960f5135d3980408c71100ee6c87fe, type: 3}
   _playerPrefab: {fileID: 7186500471938678273, guid: 7890cb7592cf573418c849b4361b1977, type: 3}
+  _sessionCode: {fileID: 3602182}
+  _playerList:
+  - {fileID: 2066549164}
+  - {fileID: 67416474}
+  - {fileID: 1603099551}
+  - {fileID: 1632373993}
+  _playerCount: {fileID: 1510276916}
+  _readySprite: {fileID: 21300000, guid: 19593ed2946dcd0439b0dfbb564bc967, type: 3}
+  _unreadySprite: {fileID: 21300000, guid: 576cfb971eff8ce40877bb3cefeddef4, type: 3}
 --- !u!1 &67416474
 GameObject:
   m_ObjectHideFlags: 0
@@ -4539,8 +4548,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1077221780}
   - component: {fileID: 1077221779}
+  - component: {fileID: 1077221781}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: PlayData
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4573,6 +4583,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1077221781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077221778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed653fa2336e5824bb4bbfd87d8a7b62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1100574169
 GameObject:
   m_ObjectHideFlags: 0

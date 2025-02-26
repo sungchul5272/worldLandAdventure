@@ -11,7 +11,7 @@ public class PlayerManagerTmp : NetworkBehaviour
         // 로컬 플레이어라면 내 이름을 서버에 전달합니다.
         if (Object.HasInputAuthority)
         {
-            string localName = PlayerDataTmp.Instance.GetPlayerName();
+            string localName = PlayerDataTmp._instance.GetPlayerName();
             RPC_SetPlayerName(localName);
         }
     }
