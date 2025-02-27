@@ -31,6 +31,8 @@ public class UIManagerTmp : MonoBehaviour
 
     [SerializeField] GameObject _connectWaitScreen; // 연결 대기 UI 패널
     [SerializeField] Text _connectWaitText;
+    [SerializeField] CanvasGroup _createCanvasGroup;
+    [SerializeField] CanvasGroup _joinCanvasGroup;
     public string _playerName { get; set; }
     string _sessionCode;
     bool _isConnecting;
@@ -114,9 +116,11 @@ public class UIManagerTmp : MonoBehaviour
 
         ShowConnectingUI();
         _sessionCode = _sessionCodeHost.text;
+        _createCanvasGroup.blocksRaycasts = false;
 
         bool success = await RoomManagerTmp._instance.OpenRoom(_sessionCode);
         HideConnectingUI();
+        _createCanvasGroup.blocksRaycasts = true;
 
         if (success)
         {
@@ -140,9 +144,11 @@ public class UIManagerTmp : MonoBehaviour
 
         ShowConnectingUI();
         _sessionCode = _sessionCodeJoin.text;
+        _joinCanvasGroup.blocksRaycasts = false;
 
         bool success = await RoomManagerTmp._instance.JoinRoom(_sessionCode);
         HideConnectingUI();
+        _joinCanvasGroup.blocksRaycasts = true;
 
         if (success)
         {
@@ -193,7 +199,8 @@ public class UIManagerTmp : MonoBehaviour
     }
     void ReadyGame()
     {
-        Debug.Log("레디");
+        Debug.Log("레디버튼 클릭");
+        PlayerManagerTmp._instance.ToggleReadyState();
     }
     void LeaveRoom()
     {

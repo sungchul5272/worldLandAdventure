@@ -2382,6 +2382,8 @@ MonoBehaviour:
   - {fileID: 1628399558}
   _connectWaitScreen: {fileID: 281146256}
   _connectWaitText: {fileID: 2008649494}
+  _createCanvasGroup: {fileID: 1925627365}
+  _joinCanvasGroup: {fileID: 2103965275}
 --- !u!1 &563927344
 GameObject:
   m_ObjectHideFlags: 0
@@ -9191,6 +9193,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1925627363}
+  - component: {fileID: 1925627365}
+  - component: {fileID: 1925627364}
   m_Layer: 5
   m_Name: Create Room Screen
   m_TagString: UI
@@ -9219,6 +9223,30 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1925627364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1925627362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43f5b078839f03a488ed5cf79526a21c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!225 &1925627365
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1925627362}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1962792844
 GameObject:
   m_ObjectHideFlags: 0
@@ -9940,6 +9968,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2103965274}
+  - component: {fileID: 2103965275}
+  - component: {fileID: 2103965276}
   m_Layer: 5
   m_Name: Join Room Screen
   m_TagString: UI
@@ -9968,6 +9998,30 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &2103965275
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2103965273}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &2103965276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2103965273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43f5b078839f03a488ed5cf79526a21c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2117494845
 GameObject:
   m_ObjectHideFlags: 0
